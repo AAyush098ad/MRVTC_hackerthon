@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sports Tournament Scheduler · Graph Coloring</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+
+/* ---------- derived tokens ---------- */
+html{
+  --chip: color-mix(in srgb, var(--text) 10%, transparent);
+  --chip-on: color-mix(in srgb, var(--accent) 28%, transparent);
+  --row-alt: color-mix(in srgb, var(--text) 4%, transparent);
+  --head: color-mix(in srgb, var(--text) 8%, transparent);
+  --warn-bg: color-mix(in srgb, #f59e0b 15%, var(--panel));
+  --warn-line: color-mix(in srgb, #f59e0b 48%, var(--panel));
+  --warn-text: color-mix(in srgb, #f59e0b 72%, var(--text));
+  --shadow: 0 10px 28px color-mix(in srgb, #000 28%, transparent);
+}
+
+/* ---------- DARK THEMES ---------- */
+html[data-theme="midnight"]{--bg:#0b1220;--panel:#111a2e;--line:#1f2b45;--text:#e6edf7;--muted:#8ba0bd;--accent:#4f8cff;--accent2:#7b5cff;--on-accent:#ffffff}
+html[data-theme="carbon"]  {--bg:#0c0c0e;--panel:#16161a;--line:#28282f;--text:#f4f4f6;--muted:#9a9aa6;--accent:#f59e0b;--accent2:#ef4444;--on-accent:#0c0c0e}
+html[data-theme="nord"]    {--bg:#2e3440;--panel:#3b4252;--line:#4c566a;--text:#eceff4;--muted:#a9b3c7;--accent:#88c0d0;--accent2:#81a1c1;--on-accent:#2e3440}
+html[data-theme="ocean"]   {--bg:#05192b;--panel:#0a2740;--line:#13395a;--text:#e0f2fe;--muted:#7fb3d5;--accent:#22d3ee;--accent2:#3b82f6;--on-accent:#04121f}
+html[data-theme="forest"]  {--bg:#07160f;--panel:#0e2317;--line:#1a3c27;--text:#e3f5e9;--muted:#7fae90;--accent:#34d399;--accent2:#a3e635;--on-accent:#04180e}
+html[data-theme="violet"]  {--bg:#130a20;--panel:#1d1132;--line:#33204f;--text:#f1e9ff;--muted:#a48cc7;--accent:#a855f7;--accent2:#ec4899;--on-accent:#ffffff}
+
+/* ---------- LIGHT THEMES ---------- */
+html[data-theme="daylight"]{--bg:#f4f7fb;--panel:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--accent2:#7c3aed;--on-accent:#ffffff}
+html[data-theme="paper"]   {--bg:#faf7f1;--panel:#ffffff;--line:#e9e0d3;--text:#2b2620;--muted:#7a6f60;--accent:#b45309;--accent2:#0f766e;--on-accent:#ffffff}
+html[data-theme="mint"]    {--bg:#f1fbf5;--panel:#ffffff;--line:#d5eee0;--text:#06281c;--muted:#5b8574;--accent:#059669;--accent2:#0891b2;--on-accent:#ffffff}
+html[data-theme="rose"]    {--bg:#fff5f8;--panel:#ffffff;--line:#f7dbe4;--text:#33111f;--muted:#96697a;--accent:#e11d48;--accent2:#9333ea;--on-accent:#ffffff}
+html[data-theme="sand"]    {--bg:#fdf8ee;--panel:#fffdf8;--line:#ece0c8;--text:#2e2617;--muted:#857456;--accent:#ca8a04;--accent2:#ea580c;--on-accent:#ffffff}
+
+body{
+  background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:14px;min-height:100vh;
+  transition:background .25s,color .25s;
+}
+h1,h2,h3,h4,p{margin:0}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding:14px 26px;background:var(--panel);border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{
+  width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:22px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:var(--shadow);
+}
+.brand h1{font-size:17px;letter-spacing:-.2px}
+.brand p{margin-top:3px;font-size:11.5px;color:var(--muted)}
+.theme-picker{display:flex;align-items:center;gap:9px}
+.theme-picker label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+
+/* ---------- layout ---------- */
+.wrap{display:grid;grid-template-columns:352px minmax(0,1fr);gap:18px;padding:18px 26px 80px;align-items:start}
+@media(max-width:1050px){.wrap{grid-template-columns:1fr}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.sticky{position:sticky;top:88px;max-height:calc(100vh - 110px);overflow-y:auto}
+.sticky::-webkit-scrollbar{width:8px}
+.sticky::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+.sec{font-size:11.5px;font-weight:800;color:var(--accent);letter-spacing:.09em;text-transform:uppercase;margin-bottom:11px}
+
+/* ---------- form ---------- */
+label.fl{display:block;font-size:10.5px;color:var(--muted);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:8px 10px;font:inherit;font-size:13px;outline:none;transition:.15s}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+input[type=checkbox]{width:auto;accent-color:var(--accent)}
+.row{display:flex;gap:9px}
+.row>div{flex:1;min-width:0}
+
+button{cursor:pointer;border:0;border-radius:10px;padding:10px 15px;font-weight:700;font-size:13px;font-family:inherit;transition:.15s}
+.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--on-accent);width:100%;margin-top:16px;padding:12px}
+.primary:hover{filter:brightness(1.09);transform:translateY(-1px)}
+.ghost{background:var(--chip);color:var(--text);border:1px solid var(--line);flex:1}
+.ghost:hover{background:var(--chip-on)}
+
+/* ---------- department / sport pickers ---------- */
+.dept{margin-bottom:13px}
+.dept-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dname{font-size:12px;font-weight:700;color:var(--text)}
+.dbtns{display:flex;gap:5px}
+.mini{background:var(--chip);color:var(--muted);font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
+.mini:hover{background:var(--chip-on);color:var(--text)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{
+  background:var(--chip);color:var(--muted);border:1px solid transparent;
+  min-width:32px;padding:5px 8px;border-radius:8px;font-size:12px;font-weight:700;
+}
+.chip.on{background:var(--chip-on);color:var(--text);border-color:var(--accent)}
+.chip:hover{transform:translateY(-1px)}
+
+.sportrow{display:flex;align-items:center;gap:8px;padding:5px 0}
+.chk{display:flex;align-items:center;gap:9px;flex:1;cursor:pointer;font-size:13px;font-weight:600}
+.chk .ico{font-size:16px}
+.sportrow.off{opacity:.42}
+.num{width:56px;text-align:center;padding:6px 4px;font-size:12.5px}
+
+/* ---------- stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 13px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:21px;color:var(--accent);line-height:1.2;letter-spacing:-.5px}
+.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.tab{background:var(--chip);color:var(--muted);border:1px solid var(--line);padding:7px 13px;border-radius:20px;font-size:12.5px;font-weight:700}
+.tab.on{background:var(--chip-on);color:var(--text);border-color:var(--accent)}
+.tab:hover{transform:translateY(-1px)}
+
+/* ---------- table ---------- */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;background:var(--head);font-weight:800;position:sticky;top:0}
+tbody tr:hover{background:var(--row-alt)}
+.dayrow td{background:var(--chip-on);color:var(--accent);font-weight:800;font-size:11.5px;letter-spacing:.06em}
+.tcell{color:var(--accent);font-weight:700;white-space:nowrap;font-size:12.5px}
+.vs{color:var(--muted);font-size:11px;margin:0 6px;font-weight:400}
+.muted{color:var(--muted);font-size:12px}
+.tblwrap{max-height:620px;overflow:auto;border-radius:12px;border:1px solid var(--line)}
+.tblwrap::-webkit-scrollbar{width:9px;height:9px}
+.tblwrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+
+/* ---------- team cards ---------- */
+.teamgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.teamcard{background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:11px 13px}
+.teamcard h4{font-size:13px;color:var(--accent);margin-bottom:7px;display:flex;justify-content:space-between;align-items:baseline}
+.teamcard h4 em{font-style:normal;color:var(--muted);font-weight:500;font-size:11px}
+.teamcard ul{margin:0;padding:0;list-style:none}
+.teamcard li{font-size:12px;color:var(--muted);padding:3px 0;border-bottom:1px dashed var(--line)}
+.teamcard li:last-child{border-bottom:0}
+.teamcard li b{color:var(--text);font-weight:600}
+
+/* ---------- bracket ---------- */
+.bracket{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px}
+.bcol{min-width:186px;flex:0 0 auto}
+.bhead{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;text-align:center}
+.bmatch{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:12px}
+.bmatch .tm{padding:2px 0;color:var(--text)}
+.bmatch .tm.win{color:var(--ok);font-weight:700}
+.bmatch .cd{font-size:9.5px;color:var(--muted);letter-spacing:.06em;font-weight:700;margin-bottom:3px}
+
+/* ---------- misc ---------- */
+details summary{cursor:pointer;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;outline:none;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸ ";transition:.2s}
+details[open] summary::before{content:"▾ "}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:70px 20px}
+.warn{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-text);font-size:12.5px;padding:10px 13px;border-radius:10px;margin-bottom:14px;line-height:1.55}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--danger,#ef4444);color:#fff;padding:11px 19px;border-radius:11px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:.28s;z-index:99;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:10px}
+@media print{
+  header,aside,.tabs,.ghost,.primary{display:none!important}
+  .wrap{grid-template-columns:1fr;padding:0}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border-color:#ccc;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">🏆</div>
+    <div>
+      <h1>Sports Tournament Scheduler</h1>
+      <p>Multi-sport · DSATUR graph coloring · Group stage + Knockout</p>
+    </div>
+  </div>
+  <div class="theme-picker">
+    <label for="theme">Theme</label>
+    <select id="theme" style="width:170px"></select>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="card sticky">
+    <div class="sec">👥 Departments &amp; Sections</div>
+    <div id="deptList"></div>
+
+    <div class="sec" style="margin-top:18px">🏅 Sports &amp; Venues</div>
+    <div id="sportList"></div>
+    <div class="hint">Number = parallel venues available for that sport.</div>
+
+    <div class="sec" style="margin-top:18px">📋 Format</div>
+    <label class="fl">Tournament format</label>
+    <select id="format">
+      <option value="groups_ko">Groups → Knockout</option>
+      <option value="rr">Single Round Robin</option>
+      <option value="rr2">Double Round Robin</option>
+      <option value="rr_ko">Round Robin → Knockout</option>
+      <option value="ko">Pure Knockout</option>
+    </select>
+    <div id="grpWrap">
+      <div class="row" style="margin-top:2px">
+        <div><label class="fl">Group size</label><input id="grpSize" type="number" min="2" max="8" value="4"></div>
+        <div><label class="fl">Qualify / group</label><input id="qual" type="number" min="1" max="4" value="2"></div>
+      </div>
+    </div>
+    <div id="koWrap" style="display:none">
+      <label class="fl">Teams in knockout</label>
+      <input id="koSize" type="number" min="2" max="32" value="8">
+    </div>
+
+    <div class="sec" style="margin-top:18px">⏱ Schedule</div>
+    <div class="row">
+      <div><label class="fl">Start date</label><input id="date" type="date"></div>
+      <div><label class="fl">Start time</label><input id="time" type="time" value="09:00"></div>
+    </div>
+    <div class="row">
+      <div><label class="fl">Slot (min)</label><input id="dur" type="number" min="10" value="60"></div>
+      <div><label class="fl">Gap (min)</label><input id="gap" type="number" min="0" value="15"></div>
+    </div>
+    <div class="row">
+      <div><label class="fl">Slots / day</label><input id="spd" type="number" min="1" max="16" value="6"></div>
+      <div><label class="fl">Min rest slots</label><input id="rest" type="number" min="0" max="6" value="1"></div>
+    </div>
+    <label class="fl" style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:12px">
+      <input type="checkbox" id="sepDays" checked> Knockout rounds start on a new day
+    </label>
+
+    <button class="primary" id="go">Generate Schedule</button>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="csv">⬇ CSV</button>
+      <button class="ghost" id="print">🖨 Print</button>
+    </div>
+  </aside>
+
+  <main id="out">
+    <div class="card"><div class="empty">Configure the tournament on the left, then hit <b>Generate Schedule</b>.</div></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   0. CONSTANTS & HELPERS
+   ========================================================= */
+const $   = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtT = d => String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+const hue  = k => `hsl(${(k * 47) % 360} 68% 58%)`;
+
+const DEPTS = [
+  { id:'ds',   name:'Data Science', short:'DS',   sections:'ABCDEF'  },
+  { id:'aiml', name:'AI & ML',      short:'AIML', sections:'ABCDEFG' },
+  { id:'cse',  name:'CSE (Core)',   short:'CSE',  sections:'ABCDEF'  },
+];
+
+const SPORTS = [
+  { id:'cricket',    name:'Cricket',    icon:'🏏', dur:150 },
+  { id:'football',   name:'Football',   icon:'⚽', dur:60  },
+  { id:'volleyball', name:'Volleyball', icon:'🏐', dur:45  },
+  { id:'basketball', name:'Basketball', icon:'🏀', dur:48  },
+  { id:'tennis',     name:'Tennis',     icon:'🎾', dur:60  },
+  { id:'khokho',     name:'Kho-Kho',    icon:'🏃', dur:40  },
+];
+const SPORT_BY_ID = Object.fromEntries(SPORTS.map(s => [s.id, s]));
+
+const VENUE_NAMES = {
+  cricket:'Cricket Ground', football:'Football Field', volleyball:'Volleyball Court',
+  basketball:'Basketball Court', tennis:'Tennis Court', khokho:'Kho-Kho Field'
+};
+
+const THEMES = [
+  { id:'midnight', name:'🌙 Midnight',    mode:'Dark'  },
+  { id:'carbon',   name:'🌑 Carbon',      mode:'Dark'  },
+  { id:'nord',     name:'❄️ Nord',        mode:'Dark'  },
+  { id:'ocean',    name:'🌊 Ocean Deep',  mode:'Dark'  },
+  { id:'forest',   name:'🌲 Forest Night',mode:'Dark'  },
+  { id:'violet',   name:'🔮 Violet Dusk', mode:'Dark'  },
+  { id:'daylight', name:'☀️ Daylight',    mode:'Light' },
+  { id:'paper',    name:'📄 Paper',       mode:'Light' },
+  { id:'mint',     name:'🌿 Mint',        mode:'Light' },
+  { id:'rose',     name:'🌸 Rose',        mode:'Light' },
+  { id:'sand',     name:'🏜️ Sand',        mode:'Light' },
+];
+
+const state = { teams:new Set(), sports:{}, tab:'all' };
+let RESULT = null;
+
+let toastTimer;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* =========================================================
+   1. FIXTURE GENERATION
+   ========================================================= */
+
+/* Circle method round robin — O(n²) */
+function roundRobin(teams, double){
+  const arr0 = teams.slice();
+  if(arr0.length % 2) arr0.push(null);          // bye
+  const n = arr0.length;
+  let a = arr0.slice();
+  const out = [];
+  for(let r = 0; r < n - 1; r++){
+    for(let i = 0; i < n / 2; i++){
+      const x = a[i], y = a[n - 1 - i];
+      if(x !== null && y !== null) out.push([x, y]);
+    }
+    a = [a[0], a[n - 1], ...a.slice(1, n - 1)];  // rotate, first fixed
+  }
+  return double ? out.concat(out.map(([x, y]) => [y, x])) : out;
+}
+
+/* Balanced group split */
+function makeGroups(teams, size){
+  const sz  = Math.max(2, size);
+  const nG  = Math.max(1, Math.ceil(teams.length / sz));
+  const gs  = Array.from({ length:nG }, () => []);
+  teams.forEach((t, i) => gs[i % nG].push(t));
+  return gs.filter(g => g.length >= 2);
+}
+
+/* Standard bracket seeding order */
+function seedOrder(n){
+  let arr = [1, 2];
+  while(arr.length < n){
+    const m = arr.length * 2, nx = [];
+    for(const x of arr){ nx.push(x); nx.push(m + 1 - x); }
+    arr = nx;
+  }
+  return arr;
+}
+
+function roundName(ri, total){
+  const left = total - ri;
+  if(left === 1) return 'Final';
+  if(left === 2) return 'Semi-Final';
+  if(left === 3) return 'Quarter-Final';
+  if(left === 4) return 'Round of 16';
+  if(left === 5) return 'Round of 32';
+  return `Round ${ri + 1}`;
+}
+
+/* Single-elimination bracket with byes */
+function buildBracket(entrants){
+  const n = entrants.length;
+  if(n < 2) return [];
+  let size = 1; while(size < n) size *= 2;
+  const order = seedOrder(size);
+  let cur = order.map(s => s <= n ? entrants[s - 1] : 'BYE');
+
+  const rounds = [];
+  const totalRounds = Math.log2(size);
+  let ri = 0;
+  while(cur.length > 1 && ri < 12){
+    const pairs = [], next = [];
+    for(let i = 0; i < cur.length; i += 2){
+      const x = cur[i], y = cur[i + 1];
+      if(x === 'BYE' && y === 'BYE'){ next.push('BYE'); continue; }
+      if(x === 'BYE'){ next.push(y); continue; }
+      if(y === 'BYE'){ next.push(x); continue; }
+      const code = `R${ri + 1}M${pairs.length + 1}`;
+      pairs.push({ a:x, b:y, code });
+      next.push(`W(${code})`);
+    }
+    rounds.push({ name: roundName(ri, totalRounds), matches: pairs });
+    cur = next;
+    ri++;
+  }
+  return rounds;
+}
+
+/* Build every match for one sport */
+function buildSport(sp, teams, cfg){
+  const out = [];
+  const push = (a, b, phase, round, group) =>
+    out.push({ sport: sp.id, a, b, phase, round, group: group || null });
+
+  const fmt = cfg.format;
+
+  /* --- pure knockout --- */
+  if(fmt === 'ko'){
+    const rounds = buildBracket(teams.slice());
+    rounds.forEach((r, i) => r.matches.forEach(m => push(m.a, m.b, 1 + i, r.name)));
+    return { matches: out };
+  }
+
+  /* --- round robin --- */
+  if(fmt === 'rr' || fmt === 'rr2' || fmt === 'rr_ko'){
+    roundRobin(teams, fmt === 'rr2').forEach(([a, b]) => push(a, b, 0, 'League'));
+    if(fmt === 'rr_ko'){
+      const n = Math.min(cfg.koSize, teams.length);
+      const ent = [];
+      for(let i = 1; i <= n; i++) ent.push(`Seed #${i}`);
+      const rounds = buildBracket(ent);
+      rounds.forEach((r, i) => r.matches.forEach(m => push(m.a, m.b, 1 + i, r.name)));
+    }
+    return { matches: out };
+  }
+
+  /* --- groups → knockout --- */
+  const gs = makeGroups(teams, cfg.groupSize);
+  gs.forEach((g, gi) => {
+    roundRobin(g, false).forEach(([a, b]) => push(a, b, 0, 'Group ' + (gi + 1), 'G' + (gi + 1)));
+  });
+
+  const ent = [];
+  for(let i = 1; i <= cfg.qual; i++)
+    gs.forEach((g, gi) => ent.push(`G${gi + 1} #${i}`));
+
+  const rounds = buildBracket(ent);
+  rounds.forEach((r, i) => r.matches.forEach(m => push(m.a, m.b, 1 + i, r.name)));
+
+  return { matches: out, groups: gs };
+}
+
+/* =========================================================
+   2. GRAPH COLORING — DSATUR
+   ========================================================= */
+function dsatur(adj, n){
+  const color = new Array(n).fill(-1);
+  const sat   = new Array(n).fill(0);
+  const deg   = adj.map(s => s.size);
+  const seen  = Array.from({ length:n }, () => new Set());
+
+  for(let it = 0; it < n; it++){
+    let v = -1, bs = -1, bd = -1;
+    for(let i = 0; i < n; i++){
+      if(color[i] !== -1) continue;
+      if(sat[i] > bs || (sat[i] === bs && deg[i] > bd)){ bs = sat[i]; bd = deg[i]; v = i; }
+    }
+    let c = 0;
+    while(seen[v].has(c)) c++;
+    color[v] = c;
+    for(const u of adj[v]){
+      if(color[u] === -1 && !seen[u].has(c)){ seen[u].add(c); sat[u]++; }
+    }
+  }
+  return color;
+}
+
+/* Greedy max-clique → lower bound ω(G) ≤ χ(G) */
+function cliqueLowerBound(adj){
+  let best = 0;
+  for(let v = 0; v < adj.length; v++){
+    const clique = [v];
+    for(const u of adj[v]){
+      if(clique.every(c => adj[c].has(u))) clique.push(u);
+    }
+    if(clique.length > best) best = clique.length;
+  }
+  return best;
+}
+
+/* =========================================================
+   3. SCHEDULER
+   ========================================================= */
+function scheduleAll(matches, teamLabels, opts){
+  const teamSet = new Set(teamLabels);
+  const rteams  = m => [m.a, m.b].filter(t => teamSet.has(t));
+
+  const slotMatches = [];      // slot -> [matchIdx]
+  const slotSport   = [];      // slot -> { sportId: count }
+  const slotTeams   = [];      // slot -> Set(team)
+  const nxt         = new Map();  // team -> earliest allowed slot
+  const assign      = new Array(matches.length).fill(-1);
+
+  const ensure = s => {
+    while(slotMatches.length <= s){
+      slotMatches.push([]); slotSport.push({}); slotTeams.push(new Set());
+    }
+  };
+
+  const phases = [...new Set(matches.map(m => m.phase))].sort((a, b) => a - b);
+  const phaseStats = [];
+
+  let minSlot = 0;
+  let lastUsed = -1;
+
+  for(const p of phases){
+    const idxs = [];
+    for(let i = 0; i < matches.length; i++) if(matches[i].phase === p) idxs.push(i);
+    if(!idxs.length) continue;
+
+    /* ---- conflict graph for this phase ---- */
+    const L = idxs.length;
+    const adj = Array.from({ length:L }, () => new Set());
+    const byTeam = new Map();
+    idxs.forEach((gi, k) => {
+      for(const t of rteams(matches[gi])){
+        if(!byTeam.has(t)) byTeam.set(t, []);
+        byTeam.get(t).push(k);
+      }
+    });
+    for(const [, list] of byTeam){
+      for(let i = 0; i < list.length; i++)
+        for(let j = i + 1; j < list.length; j++){
+          adj[list[i]].add(list[j]);
+          adj[list[j]].add(list[i]);
+        }
+    }
+
+    const colors = dsatur(adj, L);
+    let nColors = 0;
+    for(const c of colors) if(c + 1 > nColors) nColors = c + 1;
+
+    /* ---- order: colour asc, then degree desc ---- */
+    const kmap = new Map(idxs.map((gi, k) => [gi, k]));
+    const order = idxs.slice().sort((x, y) => {
+      const kx = kmap.get(x), ky = kmap.get(y);
+      return (colors[kx] - colors[ky]) || (adj[ky].size - adj[kx].size);
+    });
+
+    /* ---- greedy placement with rest + venue + team constraints ---- */
+    let phaseLast = -1;
+    for(const gi of order){
+      const m  = matches[gi];
+      const vt = rteams(m);
+
+      let s = minSlot;
+      for(const t of vt) s = Math.max(s, nxt.get(t) ?? 0);
+
+      let guard = 0;
+      for(;;){
+        ensure(s);
+        const cap  = opts.venues[m.sport] || 1;
+        const used = slotSport[s][m.sport] || 0;
+        if(used < cap && vt.every(t => !slotTeams[s].has(t))) break;
+        s++;
+        if(++guard > 30000) break;
+      }
+
+      ensure(s);
+      slotMatches[s].push(gi);
+      slotSport[s][m.sport] = (slotSport[s][m.sport] || 0) + 1;
+      vt.forEach(t => slotTeams[s].add(t));
+      for(const t of vt) nxt.set(t, s + opts.rest + 1);
+
+      assign[gi] = s;
+      if(s > lastUsed) lastUsed = s;
+      if(s > phaseLast) phaseLast = s;
+    }
+
+    phaseStats.push({ phase:p, matches:L, colors:nColors, from:minSlot, to:phaseLast });
+
+    /* ---- next phase starts later (optionally next day) ---- */
+    if(opts.sepDays){
+      minSlot = (Math.floor(lastUsed / opts.slotsPerDay) + 1) * opts.slotsPerDay;
+      if(minSlot <= lastUsed) minSlot = lastUsed + 1;
+    } else {
+      minSlot = lastUsed + 1;
+    }
+  }
+
+  while(slotMatches.length && !slotMatches[slotMatches.length - 1].length) slotMatches.pop();
+
+  return { assign, slotMatches, phaseStats, slotCount: slotMatches.length };
+}
+
+/* =========================================================
+   4. TIME GRID
+   ========================================================= */
+function buildTimes(count, o){
+  const base = new Date(o.date + 'T' + o.time + ':00');
+  const step = o.duration + o.gap;
+  const out  = [];
+  for(let i = 0; i < count; i++){
+    const dayIdx = Math.floor(i / o.slotsPerDay);
+    const idx    = i % o.slotsPerDay;
+    const st = new Date(base.getTime() + dayIdx * 86400000 + idx * step * 60000);
+    const en = new Date(st.getTime() + o.duration * 60000);
+    out.push({
+      dayIdx,
+      dateLabel: st.toLocaleDateString(undefined, { weekday:'short', day:'numeric', month:'short' }),
+      timeLabel: `${fmtT(st)}–${fmtT(en)}`
+    });
+  }
+  return out;
+}
+
+/* =========================================================
+   5. CONFLICT GRAPH VISUALISATION
+   ========================================================= */
+function svgGraph(matches, assign, subIdx){
+  const n = subIdx.length;
+  const S = 620, R = S / 2 - 74, cx = S / 2, cy = S / 2;
+
+  const P = [];
+  for(let i = 0; i < n; i++){
+    const a = (2 * Math.PI * i) / n - Math.PI / 2;
+    P.push([cx + R * Math.cos(a), cy + R * Math.sin(a)]);
+  }
+
+  /* edges = share a team */
+  const teamSet = new Set(RESULT.teamLabels);
+  const pos = new Map(subIdx.map((gi, k) => [gi, k]));
+  let edges = '', edgeCount = 0;
+  for(let i = 0; i < n; i++){
+    for(let j = i + 1; j < n; j++){
+      const mi = matches[subIdx[i]], mj = matches[subIdx[j]];
+      const ti = [mi.a, mi.b].filter(t => teamSet.has(t));
+      const tj = [mj.a, mj.b].filter(t => teamSet.has(t));
+      if(ti.some(t => tj.includes(t))){
+        edgeCount++;
+        edges += `<line x1="${P[i][0].toFixed(1)}" y1="${P[i][1].toFixed(1)}" x2="${P[j][0].toFixed(1)}" y2="${P[j][1].toFixed(1)}" style="stroke:var(--line)" stroke-width="0.9"/>`;
+      }
+    }
+  }
+
+  let nodes = '';
+  for(let i = 0; i < n; i++){
+    const slot = assign[subIdx[i]];
+    nodes += `<circle cx="${P[i][0].toFixed(1)}" cy="${P[i][1].toFixed(1)}" r="10"
+                fill="${hue(slot)}" stroke="var(--panel)" stroke-width="2"/>
+              <text x="${P[i][0].toFixed(1)}" y="${(P[i][1] + 3.4).toFixed(1)}"
+                font-size="8.5" text-anchor="middle" fill="#0b1220" font-weight="800">${subIdx[i] + 1}</text>`;
+  }
+
+  return {
+    svg: `<svg viewBox="0 0 ${S} ${S}" width="100%" style="max-width:620px;display:block;margin:0 auto">${edges}${nodes}</svg>`,
+    edgeCount
+  };
+}
+
+/* =========================================================
+   6. MAIN GENERATE
+   ========================================================= */
+function generate(){
+  /* ---- gather teams ---- */
+  const teamLabels = [];
+  for(const d of DEPTS)
+    for(const s of d.sections)
+      if(state.teams.has(d.id + '-' + s)) teamLabels.push(d.short + '-' + s);
+
+  if(teamLabels.length < 2) return toast('Select at least 2 sections.');
+
+  const activeSports = SPORTS.filter(s => state.sports[s.id].on);
+  if(!activeSports.length) return toast('Enable at least one sport.');
+
+  const cfg = {
+    format:    $('format').value,
+    groupSize: Math.max(2, +$('grpSize').value || 4),
+    qual:      Math.max(1, +$('qual').value || 2),
+    koSize:    Math.max(2, +$('koSize').value || 8),
+  };
+
+  const venues = {};
+  for(const s of SPORTS) venues[s.id] = Math.max(1, state.sports[s.id].venues || 1);
+
+  /* ---- build all matches ---- */
+  const matches = [];
+  const perSport = {};
+  for(const sp of activeSports){
+    const res = buildSport(sp, teamLabels, cfg);
+    perSport[sp.id] = res;
+    matches.push(...res.matches);
+  }
+  if(!matches.length) return toast('No matches generated — check your format.');
+  matches.forEach((m, i) => m.id = i);
+
+  /* ---- schedule ---- */
+  const opts = {
+    venues,
+    slotsPerDay: Math.max(1, +$('spd').value || 6),
+    rest:        Math.max(0, +$('rest').value || 0),
+    sepDays:     $('sepDays').checked
+  };
+
+  const t0 = performance.now();
+  const sched = scheduleAll(matches, teamLabels, opts);
+  const t1 = performance.now();
+
+  /* ---- times ---- */
+  const times = buildTimes(sched.slotCount, {
+    date: $('date').value || new Date().toISOString().slice(0, 10),
+    time: $('time').value || '09:00',
+    duration: Math.max(10, +$('dur').value || 60),
+    gap: Math.max(0, +$('gap').value || 0),
+    slotsPerDay: opts.slotsPerDay
+  });
+
+  /* ---- global conflict graph stats ---- */
+  const G = matches.length;
+  const gadj = Array.from({ length:G }, () => new Set());
+  const byTeamAll = new Map();
+  const tset = new Set(teamLabels);
+  matches.forEach((m, i) => {
+    for(const t of [m.a, m.b]){
+      if(!tset.has(t)) continue;
+      if(!byTeamAll.has(t)) byTeamAll.set(t, []);
+      byTeamAll.get(t).push(i);
+    }
+  });
+  let totalEdges = 0;
+  for(const [, list] of byTeamAll){
+    for(let i = 0; i < list.length; i++)
+      for(let j = i + 1; j < list.length; j++){
+        gadj[list[i]].add(list[j]);
+        gadj[list[j]].add(list[i]);
+        totalEdges++;
+      }
+  }
+  const lowerBound = cliqueLowerBound(gadj);
+  const maxColors  = sched.phaseStats.reduce((a, p) => Math.max(a, p.colors), 0);
+
+  /* ---- stats ---- */
+  const usedSlots = sched.slotMatches.filter(a => a.length).length;
+  const daySet = new Set();
+  sched.slotMatches.forEach((arr, s) => { if(arr.length) daySet.add(times[s].dayIdx); });
+  const groupMatches = matches.filter(m => m.phase === 0).length;
+  const koMatches = matches.length - groupMatches;
+  const capPerSlot = activeSports.reduce((a, s) => a + venues[s.id], 0);
+  const util = capPerSlot ? Math.round((matches.length / (usedSlots * capPerSlot)) * 100) : 0;
+
+  RESULT = {
+    matches, assign: sched.assign, times, venues, perSport,
+    phaseStats: sched.phaseStats, teamLabels, activeSports,
+    totalEdges, lowerBound, maxColors, usedSlots, daySet, capPerSlot,
+    groupMatches, koMatches, util, elapsed: (t1 - t0)
+  };
+
+  renderOutput();
+}
+
+/* =========================================================
+   7. RENDERING
+   ========================================================= */
+function renderOutput(){
+  const R = RESULT;
+  if(!R) return;
+
+  let html = '';
+
+  /* ---------- stat cards ---------- */
+  html += `<div class="stats">
+    <div class="stat"><b>${R.teamLabels.length}</b><span>Teams</span></div>
+    <div class="stat"><b>${R.activeSports.length}</b><span>Sports</span></div>
+    <div class="stat"><b>${R.matches.length}</b><span>Total Matches</span></div>
+    <div class="stat"><b>${R.groupMatches}</b><span>League / Group</span></div>
+    <div class="stat"><b>${R.koMatches}</b><span>Knockout</span></div>
+    <div class="stat"><b>${R.usedSlots}</b><span>Time Slots</span></div>
+    <div class="stat"><b>${R.daySet.size}</b><span>Days</span></div>
+    <div class="stat"><b>${R.maxColors}</b><span>χ (max colours)</span></div>
+    <div class="stat"><b>${R.lowerBound}</b><span>ω (lower bound)</span></div>
+    <div class="stat"><b>${R.util}%</b><span>Venue Usage</span></div>
+    <div class="stat"><b>${R.elapsed.toFixed(1)}ms</b><span>Solve Time</span></div>
+  </div>`;
+
+  /* ---------- tabs ---------- */
+  html += `<div class="tabs">
+    <button class="tab ${state.tab === 'all' ? 'on' : ''}" data-tab="all">🏆 All Sports</button>
+    ${R.activeSports.map(s => `<button class="tab ${state.tab === s.id ? 'on' : ''}" data-tab="${s.id}">${s.icon} ${esc(s.name)}</button>`).join('')}
+  </div>`;
+
+  /* ---------- schedule table ---------- */
+  html += `<div class="card" style="margin-bottom:16px">
+    <div class="sec">📅 Match Schedule${state.tab !== 'all' ? ' · ' + esc(SPORT_BY_ID[state.tab].name) : ''}</div>
+    <div class="tblwrap">${scheduleTable(R, state.tab)}</div>
+  </div>`;
+
+  /* ---------- knockouts ---------- */
+  const koSports = R.activeSports.filter(s => R.matches.some(m => m.sport === s.id && m.phase > 0));
+  if(koSports.length){
+    html += `<div class="card" style="margin-bottom:16px">
+      <div class="sec">🥇 Knockout Brackets</div>
+      ${koSports.map(s => bracketView(R, s.id)).join('')}
+    </div>`;
+  }
+
+  /* ---------- team-wise ---------- */
+  html += `<details class="card" style="margin-bottom:16px">
+    <summary>👥 Team-wise Schedule (${R.teamLabels.length} teams)</summary>
+    <div style="margin-top:14px">${teamView(R)}</div>
+  </details>`;
+
+  /* ---------- conflict graph ---------- */
+  const graphSport = state.tab !== 'all' ? state.tab : R.activeSports[0].id;
+  const gIdx = [];
+  R.matches.forEach((m, i) => { if(m.sport === graphSport && m.phase === 0) gIdx.push(i); });
+
+  if(gIdx.length && gIdx.length <= 80){
+    const g = svgGraph(R.matches, R.assign, gIdx);
+    const legend = gIdx.slice(0, 40).map(i => {
+      const s = R.assign[i];
+      return `<span><i style="background:${hue(s)}"></i>#${i + 1} → Slot ${s + 1}</span>`;
+    }).join('');
+    html += `<details class="card">
+      <summary>🕸️ Conflict Graph — ${esc(SPORT_BY_ID[graphSport].name)} group stage (${gIdx.length} matches, ${g.edgeCount} conflicts)</summary>
+      <div style="margin-top:14px">${g.svg}</div>
+      <div class="legend">${legend}</div>
+      <p class="hint">
+        Each vertex is a match. An edge means the two matches share a section — they can never be played
+        at the same time. DSATUR assigns the minimum practical number of colours; every colour class is a
+        clash-free slot. Across all sports the conflict graph has <b>${R.matches.length}</b> vertices and
+        <b>${R.totalEdges}</b> edges, with χ = <b>${R.maxColors}</b> and lower bound ω = <b>${R.lowerBound}</b>.
+      </p>
+    </details>`;
+  }
+
+  /* ---------- colouring details ---------- */
+  html += `<details class="card" style="margin-top:16px">
+    <summary>🧮 Colouring &amp; Scheduling Details</summary>
+    <div class="tblwrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Phase</th><th>Matches</th><th>Colours used (χ)</th><th>Slot window</th></tr></thead>
+        <tbody>
+          ${R.phaseStats.map(p => `<tr>
+            <td><b>${p.phase === 0 ? 'League / Group Stage' : 'Knockout Round ' + p.phase}</b></td>
+            <td>${p.matches}</td>
+            <td>${p.colors}</td>
+            <td class="muted">Slot ${p.from + 1} → ${p.to + 1}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">
+      <b>Placeholders:</b> <code>G1 #1</code> = winner of Group 1 · <code>G1 #2</code> = runner-up of Group 1 ·
+      <code>W(R1M2)</code> = winner of knockout match R1M2. Knockout rounds are ordered so that no round
+      begins before the previous one has finished.
+    </p>
+  </details>`;
+
+  $('out').innerHTML = html;
+  $('out').querySelectorAll('.tab').forEach(b => {
+    b.onclick = () => { state.tab = b.dataset.tab; renderOutput(); };
+  });
+}
+
+/* ---------- schedule table ---------- */
+function scheduleTable(R, filter){
+  const bySlot = new Map();
+  R.matches.forEach((m, i) => {
+    if(filter !== 'all' && m.sport !== filter) return;
+    const s = R.assign[i];
+    if(s == null || s < 0) return;
+    if(!bySlot.has(s)) bySlot.set(s, []);
+    bySlot.get(s).push(m);
+  });
+  if(!bySlot.size) return '<div class="empty">No matches for this filter.</div>';
+
+  const slots = [...bySlot.keys()].sort((a, b) => a - b);
+  const days  = [...new Set(slots.map(s => R.times[s].dayIdx))].sort((a, b) => a - b);
+  const dayNo = new Map(days.map((d, i) => [d, i + 1]));
+
+  let html = `<table>
+    <thead><tr>
+      <th style="width:132px">Time</th>
+      <th style="width:44px">Sport</th>
+      <th style="width:160px">Venue</th>
+      <th>Match</th>
+      <th style="width:170px">Stage</th>
+    </tr></thead><tbody>`;
+
+  let curDay = null;
+  for(const s of slots){
+    const t = R.times[s];
+    if(t.dayIdx !== curDay){
+      curDay = t.dayIdx;
+      html += `<tr class="dayrow"><td colspan="5">DAY ${dayNo.get(curDay)} · ${t.dateLabel}</td></tr>`;
+    }
+
+    const list = bySlot.get(s).slice().sort((a, b) => a.sport.localeCompare(b.sport) || a.id - b.id);
+    const counters = {};
+
+    list.forEach((m, k) => {
+      counters[m.sport] = (counters[m.sport] || 0) + 1;
+      const totalV = R.venues[m.sport] || 1;
+      const vname  = totalV > 1 ? `${VENUE_NAMES[m.sport]} ${counters[m.sport]}` : VENUE_NAMES[m.sport];
+      const sp     = SPORT_BY_ID[m.sport];
+
+      html += `<tr>
+        ${k === 0 ? `<td rowspan="${list.length}" class="tcell">${t.timeLabel}</td>` : ''}
+        <td title="${esc(sp.name)}">${sp.icon}</td>
+        <td>${esc(vname)}</td>
+        <td><b>${esc(m.a)}</b><span class="vs">vs</span><b>${esc(m.b)}</b></td>
+        <td class="muted">${esc(m.round || '')}${m.group ? ' · ' + esc(m.group) : ''}</td>
+      </tr>`;
+    });
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+/* ---------- knockout bracket ---------- */
+function bracketView(R, sportId){
+  const ko = R.matches.filter(m => m.sport === sportId && m.phase > 0);
+  if(!ko.length) return '';
+
+  const rounds = new Map();
+  ko.forEach(m => {
+    if(!rounds.has(m.phase)) rounds.set(m.phase, { name:m.round, list:[] });
+    rounds.get(m.phase).list.push(m);
+  });
+
+  const cols = [...rounds.keys()].sort((a, b) => a - b).map(p => {
+    const r = rounds.get(p);
+    return `<div class="bcol">
+      <div class="bhead">${esc(r.name)}</div>
+      ${r.list.map(m => `<div class="bmatch">
+        <div class="cd">${esc(m.round)}</div>
+        <div class="tm">${esc(m.a)}</div>
+        <div class="tm">${esc(m.b)}</div>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  return `<div style="margin-bottom:20px">
+    <div style="font-size:13px;font-weight:800;margin-bottom:10px">${SPORT_BY_ID[sportId].icon} ${esc(SPORT_BY_ID[sportId].name)}</div>
+    <div class="bracket">${cols}</div>
+  </div>`;
+}
+
+/* ---------- team-wise view ---------- */
+function teamView(R){
+  const map = new Map(R.teamLabels.map(t => [t, []]));
+
+  R.matches.forEach((m, i) => {
+    const s = R.assign[i];
+    if(s == null || s < 0) return;
+    const t = R.times[s];
+    const totalV = R.venues[m.sport] || 1;
+    const sp = SPORT_BY_ID[m.sport];
+
+    if(map.has(m.a)) map.get(m.a).push({ day:t.dayIdx, time:t.timeLabel.split('–')[0], sp, opp:m.b, round:m.round });
+    if(map.has(m.b)) map.get(m.b).push({ day:t.dayIdx, time:t.timeLabel.split('–')[0], sp, opp:m.a, round:m.round });
+  });
+
+  return `<div class="teamgrid">${R.teamLabels.map(t => {
+    const list = map.get(t).sort((a, b) => a.day - b.day || a.time.localeCompare(b.time));
+    return `<div class="teamcard">
+      <h4>${esc(t)} <em>${list.length} matches</em></h4>
+      <ul>${list.map(x => `<li>D${x.day + 1} · ${x.time} · ${x.sp.icon} <b>vs ${esc(x.opp)}</b></li>`).join('')}</ul>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* =========================================================
+   8. EXPORT
+   ========================================================= */
+function exportCSV(){
+  if(!RESULT) return toast('Generate a schedule first.');
+  const R = RESULT;
+  const rows = [['Day','Date','Time','Sport','Venue','Team A','Team B','Stage','Group']];
+
+  R.matches
+    .map((m, i) => ({ m, s: R.assign[i] }))
+    .sort((a, b) => a.s - b.s || a.m.sport.localeCompare(b.m.sport))
+    .forEach(({ m, s }) => {
+      const t = R.times[s];
+      const sp = SPORT_BY_ID[m.sport];
+      rows.push([
+        'Day ' + (t.dayIdx + 1), t.dateLabel, t.timeLabel,
+        sp.name, VENUE_NAMES[m.sport], m.a, m.b, m.round || '', m.group || ''
+      ]);
+    });
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tournament-schedule.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* =========================================================
+   9. UI BOOTSTRAP
+   ========================================================= */
+function initThemeSelect(){
+  const sel = $('theme');
+  const dark = THEMES.filter(t => t.mode === 'Dark');
+  const light = THEMES.filter(t => t.mode === 'Light');
+  sel.innerHTML =
+    `<optgroup label="Dark">${dark.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}</optgroup>` +
+    `<optgroup label="Light">${light.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}</optgroup>`;
+  sel.value = 'midnight';
+  sel.onchange = () => { document.documentElement.dataset.theme = sel.value; };
+}
+
+function initSidebar(){
+  /* departments */
+  $('deptList').innerHTML = DEPTS.map(d => `
+    <div class="dept">
+      <div class="dept-head">
+        <span class="dname">${esc(d.name)}</span>
+        <span class="dbtns">
+          <button class="mini" data-all="${d.id}">All</button>
+          <button class="mini" data-none="${d.id}">None</button>
+        </span>
+      </div>
+      <div class="chips">
+        ${[...d.sections].map(s => `<button class="chip on" data-team="${d.id}-${s}">${s}</button>`).join('')}
+      </div>
+    </div>`).join('');
+
+  /* sports */
+  $('sportList').innerHTML = SPORTS.map(s => `
+    <div class="sportrow">
+      <label class="chk">
+        <input type="checkbox" checked data-sport="${s.id}">
+        <span class="ico">${s.icon}</span>
+        <span class="nm">${esc(s.name)}</span>
+      </label>
+      <input class="num" type="number" min="1" max="8" value="1" data-venues="${s.id}" title="Parallel venues">
+    </div>`).join('');
+
+  /* department events */
+  $('deptList').addEventListener('click', e => {
+    const all  = e.target.closest('[data-all]');
+    const none = e.target.closest('[data-none]');
+    const chip = e.target.closest('[data-team]');
+
+    if(all){
+      const d = DEPTS.find(x => x.id === all.dataset.all);
+      [...d.sections].forEach(s => {
+        state.teams.add(d.id + '-' + s);
+        document.querySelector(`[data-team="${d.id}-${s}"]`).classList.add('on');
+      });
+    } else if(none){
+      const d = DEPTS.find(x => x.id === none.dataset.none);
+      [...d.sections].forEach(s => {
+        state.teams.delete(d.id + '-' + s);
+        document.querySelector(`[data-team="${d.id}-${s}"]`).classList.remove('on');
+      });
+    } else if(chip){
+      const id = chip.dataset.team;
+      if(state.teams.has(id)){ state.teams.delete(id); chip.classList.remove('on'); }
+      else { state.teams.add(id); chip.classList.add('on'); }
+    }
+  });
+
+  /* sport events */
+  $('sportList').addEventListener('change', e => {
+    if(e.target.dataset.sport){
+      state.sports[e.target.dataset.sport].on = e.target.checked;
+      e.target.closest('.sportrow').classList.toggle('off', !e.target.checked);
+    }
+  });
+  $('sportList').addEventListener('input', e => {
+    if(e.target.dataset.venues){
+      const v = Math.max(1, Math.min(8, +e.target.value || 1));
+      state.sports[e.target.dataset.venues].venues = v;
+    }
+  });
+
+  /* format conditional fields */
+  $('format').addEventListener('change', () => {
+    const f = $('format').value;
+    $('grpWrap').style.display = f === 'groups_ko' ? 'block' : 'none';
+    $('koWrap').style.display  = f === 'rr_ko' ? 'block' : 'none';
+  });
+}
+
+function boot(){
+  /* state defaults */
+  for(const d of DEPTS) for(const s of d.sections) state.teams.add(d.id + '-' + s);
+  for(const s of SPORTS) state.sports[s.id] = { on:true, venues:1 };
+
+  initThemeSelect();
+  initSidebar();
+
+  $('date').value = new Date().toISOString().slice(0, 10);
+  $('go').onclick    = generate;
+  $('csv').onclick   = exportCSV;
+  $('print').onclick = () => window.print();
+
+  generate();   // demo run on load
+}
+
+boot();
+</script>
+</body>
+</html>
