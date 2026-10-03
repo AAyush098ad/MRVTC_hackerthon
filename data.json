@@ -1,0 +1,32 @@
+{
+  "depts": [
+    {
+      "id": "ds",
+      "name": "Data Science",
+      "short": "DS",
+      "sections": ["A", "B", "C", "D", "E", "F"]
+    },
+    {
+      "id": "aiml",
+      "name": "AI & ML",
+      "short": "AIML",
+      "sections": ["A", "B", "C", "D", "E", "F", "G"]
+    },
+    {
+      "id": "cse",
+      "name": "CSE (Core)",
+      "short": "CSE",
+      "sections": ["A", "B", "C", "D", "E", "F"]
+    }
+  ],
+  "sports": [
+    { "id": "cricket",    "name": "Cricket",    "icon": "🏏", "dur": 150, "venue": "Cricket Ground"   },
+    { "id": "football",   "name": "Football",   "icon": "⚽", "dur": 60,  "venue": "Football Field"   },
+    { "id": "volleyball", "name": "Volleyball", "icon": "🏐", "dur": 45,  "venue": "Volleyball Court" },
+    { "id": "basketball", "name": "Basketball", "icon": "🏀", "dur": 48,  "venue": "Basketball Court" },
+    { "id": "tennis",     "name": "Tennis",     "icon": "🎾", "dur": 60,  "venue": "Tennis Court"     },
+    { "id": "khokho",     "name": "Kho-Kho",    "icon": "🏃", "dur": 40,  "venue": "Kho-Kho Field"    }
+  ],
+  "events": [],
+  "announcements": []
+}
