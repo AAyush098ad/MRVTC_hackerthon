@@ -204,12 +204,49 @@ tbody tr.drop-invalid{outline:2px dashed var(--danger);outline-offset:-2px;backg
 .bmatch .cd{font-size:9.5px;color:var(--muted);letter-spacing:.06em;font-weight:700;margin-bottom:3px}
 .bmatch .sc{font-size:11px;color:var(--muted);float:right}
 
+/* =========================================================
+   STANDINGS — sport tabs + tables
+   ========================================================= */
+.stand-tabs{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;
+  padding:6px;background:var(--bg);border:1px solid var(--line);border-radius:12px;
+}
+.stab{
+  background:transparent;color:var(--muted);
+  padding:8px 14px;border-radius:9px;
+  font-size:12.5px;font-weight:800;letter-spacing:.02em;
+  border:1px solid transparent;transition:.15s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.stab:hover:not(.on){background:var(--chip);color:var(--text)}
+.stab.on{background:var(--chip-on);color:var(--text);border-color:var(--accent)}
+
+.stand-wrap{display:flex;flex-direction:column;gap:14px}
+.stand-groups{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;
+}
+.stand-group{
+  background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+}
+.stand-group .gname{
+  font-size:12px;font-weight:800;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.stand-group .gname em{
+  font-style:normal;color:var(--muted);font-weight:600;
+  font-size:10.5px;letter-spacing:.04em;text-transform:none;
+}
+
 .standings{width:100%;border-collapse:collapse;font-size:12.5px}
 .standings th,.standings td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--line)}
-.standings th{background:var(--head);color:var(--muted);font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.standings th{background:var(--head);color:var(--muted);font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;position:static;box-shadow:none}
 .standings td:not(:first-child),.standings th:not(:first-child){text-align:center}
-.standings tr:nth-child(-n+2) td:first-child::before{content:"● ";color:var(--ok);font-weight:900}
-.standings tr:nth-child(n+3) td:first-child::before{content:"○ ";color:var(--muted)}
+.standings td.team{font-weight:700;color:var(--text);white-space:nowrap}
+.standings td.pts{font-weight:800;color:var(--accent)}
+.standings tr.qualified td.team::before{content:"● ";color:var(--ok);font-weight:900}
+.standings tr.qualified{background:color-mix(in srgb,var(--ok) 6%,transparent)}
+.standings tr:last-child td{border-bottom:0}
 
 details summary{cursor:pointer;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;outline:none;list-style:none}
 details summary::-webkit-details-marker{display:none}
@@ -228,9 +265,6 @@ details[open] summary::before{content:"▾ "}
 .banner{background:color-mix(in srgb,var(--accent) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--accent) 35%,var(--panel));color:var(--text);padding:12px 16px;border-radius:12px;font-size:12.5px;margin-bottom:16px;line-height:1.6}
 .banner b{color:var(--accent)}
 
-/* =========================================================
-   ANNOUNCEMENTS
-   ========================================================= */
 .ann-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .ann-item{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:13px 16px;box-shadow:var(--shadow);animation:slideIn .35s ease}
 @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
@@ -245,9 +279,6 @@ details[open] summary::before{content:"▾ "}
 .ann-item .adel{background:transparent;color:var(--muted);padding:4px 8px;font-size:14px;border-radius:6px}
 .ann-item .adel:hover{color:var(--danger);background:var(--chip)}
 
-/* =========================================================
-   MANAGE PANEL
-   ========================================================= */
 .mg-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;background:var(--panel);border:1px solid var(--line);padding:6px;border-radius:14px}
 .mg-tab{background:transparent;color:var(--muted);padding:9px 15px;border-radius:9px;font-size:12.5px;font-weight:800;transition:.15s}
 .mg-tab.on{background:var(--chip-on);color:var(--accent)}
@@ -277,18 +308,12 @@ details[open] summary::before{content:"▾ "}
 .prio-btn{background:var(--chip);color:var(--muted);padding:7px 13px;border-radius:8px;font-size:11.5px;font-weight:800;transition:.15s}
 .prio-btn.on{background:var(--chip-on);color:var(--text);border:1px solid var(--accent)}
 
-/* =========================================================
-   CHARTS
-   ========================================================= */
 .chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:16px}
 .chart-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 15px}
 .chart-box h4{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);font-weight:800;margin-bottom:12px}
 .chart-box svg{display:block;width:100%;height:auto;overflow:visible}
 .chart-empty{color:var(--muted);font-size:12px;text-align:center;padding:30px 0}
 
-/* =========================================================
-   MODAL
-   ========================================================= */
 .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;animation:fade .2s ease}
 .modal-back.show{display:flex}
 @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -309,9 +334,6 @@ details[open] summary::before{content:"▾ "}
 .score-team input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
 .score-dash{font-size:22px;color:var(--muted);font-weight:900;padding:0 8px}
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
 @media(max-width:700px){
   .landing{padding:0}
   .login-card{grid-template-columns:1fr;border-radius:0;min-height:100vh;width:100%}
@@ -374,6 +396,11 @@ details[open] summary::before{content:"▾ "}
   .ann-item .amsg{font-size:11.5px}
 
   .chart-grid{grid-template-columns:1fr}
+
+  .stand-tabs{padding:4px;gap:4px}
+  .stab{padding:6px 10px;font-size:11px}
+  .stand-groups{grid-template-columns:1fr}
+  .stand-group{padding:10px 12px}
 }
 @media(max-width:420px){
   .userchip .meta{display:none}
@@ -382,7 +409,7 @@ details[open] summary::before{content:"▾ "}
 }
 
 @media print{
-  header,aside,.tabs,.ghost,.primary,.banner,.admin-nav,.ann-bar,.chart-grid,.tour-picker,.theme-picker,.logout-btn,.userchip{display:none!important}
+  header,aside,.tabs,.ghost,.primary,.banner,.admin-nav,.ann-bar,.chart-grid,.tour-picker,.theme-picker,.logout-btn,.userchip,.stand-tabs{display:none!important}
   .wrap{grid-template-columns:1fr;padding:0}
   body{background:#fff;color:#000}
   .card{box-shadow:none;border-color:#ccc;break-inside:avoid}
@@ -391,9 +418,6 @@ details[open] summary::before{content:"▾ "}
 </head>
 <body>
 
-<!-- ============================================================
-     LANDING / LOGIN
-     ============================================================ -->
 <div class="landing" id="landing">
   <div class="landing-top">
     <label for="themeLogin">Theme</label>
@@ -439,9 +463,6 @@ details[open] summary::before{content:"▾ "}
   </div>
 </div>
 
-<!-- ============================================================
-     APP
-     ============================================================ -->
 <div id="app">
   <header>
     <div class="brand">
@@ -549,7 +570,6 @@ const STORE = {
   },
 
   load(){
-    /* 1. localStorage */
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) {
@@ -560,7 +580,6 @@ const STORE = {
       }
     } catch(_){}
 
-    /* Migration from older single-tournament shape */
     if (!this.data.tournaments.length && this.data.depts){
       const t = this._newTournament('MRVTC Sports Fest');
       t.depts         = this.data.depts;
@@ -570,7 +589,6 @@ const STORE = {
       this.data = { activeTournamentId: t.id, tournaments: [t] };
     }
 
-    /* Fresh install */
     if (!this.data.tournaments.length){
       const t = this._newTournament('MRVTC Sports Fest');
       this.data = { activeTournamentId: t.id, tournaments: [t] };
@@ -579,7 +597,6 @@ const STORE = {
     if (!this.data.activeTournamentId)
       this.data.activeTournamentId = this.data.tournaments[0].id;
 
-    /* 2. Background sync if server present */
     if (location.protocol !== 'file:'){
       fetch('/api/state')
         .then(r => r.ok ? r.json() : null)
@@ -617,7 +634,6 @@ const STORE = {
   }
 };
 
-/* Accessors */
 const getDepts   = () => STORE.active().depts;
 const getSports  = () => STORE.active().sports;
 const getSport   = id => STORE.active().sports.find(s => s.id === id);
@@ -625,12 +641,11 @@ const getEvents  = () => STORE.active().events;
 const getAnns    = () => STORE.active().announcements;
 const getResults = () => (STORE.active().results = STORE.active().results || {});
 
-/* Match key: stable across regenerations */
 const matchKey = m => [m.sport, m.a, m.b, m.round || '', m.group || ''].join('|');
 const getResult = m => getResults()[matchKey(m)] || null;
 
 /* =========================================================
-   3. AUTH (server + local fallback)
+   3. AUTH
    ========================================================= */
 const API = {
   token: sessionStorage.getItem('mrvtc_token') || null,
@@ -743,6 +758,7 @@ function renderTourSelector(){
   sel.onchange = () => {
     STORE.data.activeTournamentId = sel.value;
     STORE.save();
+    state.standingsSport = null;
     syncState();
     renderSidebar();
     if (currentView === 'manage' && currentUser && currentUser.role === 'admin') renderManage();
@@ -759,6 +775,7 @@ function createNewTournament(){
   STORE.data.tournaments.push(t);
   STORE.data.activeTournamentId = t.id;
   STORE.save();
+  state.standingsSport = null;
   renderTourSelector();
   syncState();
   renderSidebar();
@@ -769,7 +786,7 @@ function createNewTournament(){
 /* =========================================================
    6. ACTIVE STATE
    ========================================================= */
-const state = { teams:new Set(), sports:{}, tab:'all' };
+const state = { teams:new Set(), sports:{}, tab:'all', standingsSport:null };
 let RESULT = null;
 
 function syncState(){
@@ -1032,8 +1049,6 @@ function buildTimes(count, o){
 /* =========================================================
    11. SVG GRAPHS
    ========================================================= */
-
-/* Conflict graph */
 function svgGraph(matches, assign, subIdx){
   const n = subIdx.length;
   const S = 620, R = S / 2 - 74, cx = S / 2, cy = S / 2;
@@ -1067,7 +1082,6 @@ function svgGraph(matches, assign, subIdx){
   };
 }
 
-/* Bar chart helper */
 function barChart(data, opts){
   opts = opts || {};
   const W = 400, H = 180, padL = 36, padR = 12, padT = 14, padB = 42;
@@ -1080,7 +1094,6 @@ function barChart(data, opts){
   const barW = Math.min(48, (innerW / n) * 0.7);
   const gap  = (innerW / n) - barW;
 
-  /* y grid */
   let grid = '';
   const ticks = 4;
   for (let i = 0; i <= ticks; i++){
@@ -1100,7 +1113,6 @@ function barChart(data, opts){
       <title>${esc(d.label)}: ${d.value}</title>
     </rect>`;
     bars += `<text x="${(x + barW / 2).toFixed(1)}" y="${(y - 4).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text)">${d.value}</text>`;
-    /* label rotated if many */
     const rot = n > 8 ? -45 : 0;
     const lx = x + barW / 2;
     const ly = padT + innerH + 14;
@@ -1110,7 +1122,6 @@ function barChart(data, opts){
   return `<svg viewBox="0 0 ${W} ${H}">${grid}${bars}</svg>`;
 }
 
-/* Horizontal bar chart */
 function hBarChart(data){
   const W = 400, rowH = 24, padL = 100, padR = 40, padT = 8, padB = 8;
   const H = padT + padB + data.length * rowH;
@@ -1132,9 +1143,7 @@ function hBarChart(data){
   return `<svg viewBox="0 0 ${W} ${H}">${out}</svg>`;
 }
 
-/* Stacked bar: venues used per day, grouped by sport */
-function stackedBarChart(days, sportsData){
-  /* days: [{ label, values:{sportId: count} }] */
+function stackedBarChart(days){
   const W = 440, H = 200, padL = 40, padR = 12, padT = 14, padB = 46;
   const innerW = W - padL - padR;
   const innerH = H - padT - padB;
@@ -1146,7 +1155,6 @@ function stackedBarChart(days, sportsData){
   const barW = Math.min(46, (innerW / n) * 0.7);
   const gap  = (innerW / n) - barW;
 
-  /* grid */
   let grid = '';
   for (let i = 0; i <= 4; i++){
     const y = padT + innerH - (i / 4) * innerH;
@@ -1159,14 +1167,13 @@ function stackedBarChart(days, sportsData){
   days.forEach((d, i) => {
     const x = padL + i * (barW + gap) + gap / 2;
     let stackY = padT + innerH;
-    const entries = Object.entries(d.values);
-    entries.forEach(([sportId, count]) => {
+    Object.entries(d.values).forEach(([sportId, count]) => {
       if (!count) return;
       const bh = (count / max) * innerH;
       stackY -= bh;
-      const sp = getSport(sportId);
       const sportIdx = getSports().findIndex(s => s.id === sportId);
       const fill = hue(sportIdx * 3);
+      const sp = getSport(sportId);
       bars += `<rect x="${x.toFixed(1)}" y="${stackY.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${fill}">
         <title>${esc((sp && sp.name) || sportId)} on ${esc(d.label)}: ${count}</title>
       </rect>`;
@@ -1310,7 +1317,6 @@ function renderEvents(){
 }
 
 function renderCharts(R){
-  /* Matches per day */
   const dayCounts = new Map();
   R.matches.forEach((m, i) => {
     const s = R.assign[i];
@@ -1321,7 +1327,6 @@ function renderCharts(R){
   const dayKeys = [...dayCounts.keys()].sort((a, b) => a - b);
   const perDay = dayKeys.map(k => ({ label: 'D' + (k + 1), value: dayCounts.get(k) }));
 
-  /* Matches per sport */
   const sportCounts = new Map();
   R.matches.forEach(m => sportCounts.set(m.sport, (sportCounts.get(m.sport) || 0) + 1));
   const perSport = [...sportCounts.entries()].map(([id, v]) => {
@@ -1329,7 +1334,6 @@ function renderCharts(R){
     return { label: (getSport(id) || {}).name || id, value: v, color: hue(idx * 3) };
   }).sort((a, b) => b.value - a.value);
 
-  /* Stacked bar — sports per day */
   const daySports = new Map();
   R.matches.forEach((m, i) => {
     const s = R.assign[i];
@@ -1344,7 +1348,6 @@ function renderCharts(R){
     values: daySports.get(k)
   }));
 
-  /* Team load (top 12 teams by match count) */
   const teamCount = new Map();
   R.matches.forEach(m => {
     if (R.teamLabels.includes(m.a)) teamCount.set(m.a, (teamCount.get(m.a) || 0) + 1);
@@ -1368,7 +1371,7 @@ function renderCharts(R){
       </div>
       <div class="chart-box">
         <h4>Sport mix per day</h4>
-        ${stackedBarChart(stackedBarDays(stackedData), null)}
+        ${stackedBarChart(stackedData)}
       </div>
       <div class="chart-box">
         <h4>Team match load (top 12)</h4>
@@ -1377,9 +1380,6 @@ function renderCharts(R){
     </div>
   </div>`;
 }
-
-/* helper for the stacked chart when there's no secondary dataset */
-function stackedBarDays(days){ return days; }
 
 function renderOutput(){
   const R = RESULT;
@@ -1426,7 +1426,7 @@ function renderOutput(){
 
   html += `<details class="card" style="margin-bottom:16px" open>
     <summary>📊 Standings (live)</summary>
-    <div style="margin-top:14px">${standingsView(R)}</div>
+    <div style="margin-top:14px" id="standingsRoot">${standingsView(R)}</div>
   </details>`;
 
   const koSports = R.activeSports.filter(s => R.matches.some(m => m.sport === s.id && m.phase > 0));
@@ -1479,12 +1479,10 @@ function renderOutput(){
 
   $('out').innerHTML = html;
 
-  /* Tab handlers */
   $('out').querySelectorAll('.tab').forEach(b => {
     b.onclick = () => { state.tab = b.dataset.tab; renderOutput(); };
   });
 
-  /* Delete announcement */
   $('out').querySelectorAll('[data-del-ann]').forEach(b => {
     b.onclick = () => {
       const id = b.dataset.delAnn;
@@ -1495,7 +1493,6 @@ function renderOutput(){
     };
   });
 
-  /* Match row click → modal */
   $('out').querySelectorAll('.sched-table tbody tr[data-match-idx]').forEach(tr => {
     tr.onclick = e => {
       if (e.target.closest('input, button')) return;
@@ -1503,16 +1500,17 @@ function renderOutput(){
     };
   });
 
-  /* Drag and drop */
   if (isAdmin) attachDragHandlers();
 
-  /* ICS + print buttons */
   $('out').querySelectorAll('[data-ics-team]').forEach(b => {
     b.onclick = e => { e.stopPropagation(); generateICS(b.dataset.icsTeam); };
   });
   $('out').querySelectorAll('[data-print-team]').forEach(b => {
     b.onclick = e => { e.stopPropagation(); printTeam(b.dataset.printTeam); };
   });
+
+  /* Bind standings sport tabs */
+  bindStandingsTabs();
 }
 
 function scheduleTable(R, filter){
@@ -1636,7 +1634,7 @@ function teamView(R){
 }
 
 /* =========================================================
-   14. STANDINGS
+   14. STANDINGS — per-sport tabs
    ========================================================= */
 function computeStandings(sportId, groupFilter){
   const R = RESULT;
@@ -1668,46 +1666,89 @@ function computeStandings(sportId, groupFilter){
 }
 
 function standingsView(R){
-  const sports = R.activeSports.filter(s =>
+  /* only sports that actually have a group stage */
+  const sportsWithGroups = R.activeSports.filter(s =>
     R.matches.some(m => m.sport === s.id && m.phase === 0));
-  if (!sports.length) return '';
+  if (!sportsWithGroups.length){
+    return '<div class="hint">No group stage in this tournament — nothing to stand.</div>';
+  }
 
-  return sports.map(sp => {
-    const groups = [...new Set(R.matches
-      .filter(m => m.sport === sp.id && m.phase === 0 && m.group)
-      .map(m => m.group))].sort();
+  /* Which sport is currently selected? default to first */
+  let active = state.standingsSport;
+  if (!active || !sportsWithGroups.find(s => s.id === active)){
+    active = sportsWithGroups[0].id;
+    state.standingsSport = active;
+  }
+  const sp = sportsWithGroups.find(s => s.id === active);
 
-    const tables = (groups.length ? groups : [null]).map(g => {
-      const rows = computeStandings(sp.id, g);
-      if (!rows.length) return '';
-      return `
-        <div style="margin-bottom:20px">
-          ${g ? `<div style="font-weight:800;margin:12px 0 8px;color:var(--accent);font-size:13px">${esc(g)}</div>` : ''}
-          <div class="tblwrap" style="max-height:none">
-            <table class="standings">
-              <thead><tr>
-                <th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th>
-                <th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
-              </tr></thead>
-              <tbody>${rows.map(r => `<tr>
-                <td><b>${esc(r.team)}</b></td>
-                <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
-                <td>${r.gf}</td><td>${r.ga}</td>
-                <td>${r.gd > 0 ? '+' : ''}${r.gd}</td>
-                <td><b>${r.pts}</b></td>
-              </tr>`).join('')}</tbody>
-            </table>
-          </div>
-        </div>`;
-    }).join('');
+  /* sport tab strip */
+  const tabs = sportsWithGroups.map(s => {
+    const matchCount = R.matches.filter(m => m.sport === s.id && m.phase === 0).length;
+    return `<button class="stab ${s.id === active ? 'on' : ''}" data-stand-sport="${s.id}">
+      ${s.icon} ${esc(s.name)}
+      <span style="color:var(--muted);font-weight:600;font-size:10.5px">· ${matchCount}</span>
+    </button>`;
+  }).join('');
 
-    return `<div style="margin-bottom:28px">
-      <div style="font-size:14px;font-weight:800;margin-bottom:12px">
-        ${sp.icon} ${esc(sp.name)} — Standings
+  /* group tables for the active sport */
+  const groups = [...new Set(R.matches
+    .filter(m => m.sport === sp.id && m.phase === 0 && m.group)
+    .map(m => m.group))].sort();
+
+  const qual = Math.max(1, +($('qual') ? $('qual').value : 2) || 2);
+
+  const groupBlocks = (groups.length ? groups : [null]).map(g => {
+    const rows = computeStandings(sp.id, g);
+    if (!rows.length) return '';
+    const completed = rows.reduce((n, r) => n + r.p, 0) / 2;
+    const total = (rows.length * (rows.length - 1)) / 2;
+
+    return `<div class="stand-group">
+      <div class="gname">
+        ${g ? esc(g) : 'League table'}
+        <em>${Math.round(completed)} / ${total} matches played</em>
       </div>
-      ${tables || '<div class="hint">No completed group matches yet.</div>'}
+      <table class="standings">
+        <thead><tr>
+          <th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th>
+          <th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map((r, idx) => `
+            <tr class="${idx < qual ? 'qualified' : ''}">
+              <td class="team">${esc(r.team)}</td>
+              <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
+              <td>${r.gf}</td><td>${r.ga}</td>
+              <td>${r.gd > 0 ? '+' : ''}${r.gd}</td>
+              <td class="pts">${r.pts}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="hint" style="margin-top:8px">
+        ● top ${qual} advance to knockout
+      </div>
     </div>`;
   }).join('');
+
+  return `
+    <div class="stand-tabs">${tabs}</div>
+    <div class="stand-wrap">
+      <div class="stand-groups">
+        ${groupBlocks || '<div class="hint">No completed group matches yet.</div>'}
+      </div>
+    </div>`;
+}
+
+function bindStandingsTabs(){
+  const root = $('standingsRoot');
+  if (!root) return;
+  root.querySelectorAll('[data-stand-sport]').forEach(b => {
+    b.onclick = () => {
+      state.standingsSport = b.dataset.standSport;
+      root.innerHTML = standingsView(RESULT);
+      bindStandingsTabs();
+    };
+  });
 }
 
 /* =========================================================
@@ -2563,7 +2604,7 @@ function boot(){
   syncState();
   fillThemeOptions();
   bootAuth();
-  window.closeModal = closeModal;   // expose for inline handler
+  window.closeModal = closeModal;
 }
 
 boot();
